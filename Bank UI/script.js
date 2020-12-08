@@ -64,9 +64,12 @@ const inputClosePin = document.querySelector('.form__input--pin');
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-const displayMovments = (movements) => {
+const displayMovments = (movements, sort = false) => {
   containerMovements.innerHTML = "";
-  movements.forEach((movement, index) => {
+
+  const movs = sort ? movements.slice().sort((a,b) => a - b) : movements;
+
+  movs.forEach((movement, index) => {
     const type = movement > 0 ? 'deposit' : 'withdrawal';
     const html = `
       <div class="movements__row">
@@ -78,6 +81,13 @@ const displayMovments = (movements) => {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
+
+let sorted = false;
+// btn sort click
+btnSort.addEventListener('click', (e) => {
+  displayMovments(currentAccount.movements, !sorted);
+  sorted = !sorted;
+})
 
 
 
@@ -151,7 +161,33 @@ btnTransfer.addEventListener('click', (e) => {
     reciverAcc.movements.push(amount);
     updateUI(currentAccount);
   }
+});
+
+
+// request a lone if atleast one deposit with 10% of req loan maount
+btnLoan.addEventListener('click', (e) => {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+  if (amount > 0 && currentAccount.movements.some(mov => mov >= amount / 10)){
+    currentAccount.movements.push(amount);
+    updateUI(currentAccount);
+    inputLoanAmount.value = "";
+  }
 })
+
+
+// delete an account
+btnClose.addEventListener('click', (e) => {
+  e.preventDefault();
+  if(inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin){
+    const index = accounts.findIndex( acc => acc.username === currentAccount.username);
+    accounts.splice(index, 1);
+    containerApp.style.opacity = 0;
+  }
+});
+
+
+
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
